@@ -3,7 +3,7 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>AM 領航員 x Uniopen：終極監視版</title>
+   <title>AM 領航員：全點數修正版</title>
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
    <style>
@@ -14,24 +14,21 @@
        h2 { font-size: 1.1em; border-left: 4px solid var(--primary); padding-left: 10px; margin: 0 0 15px 0; }
        .monitor-card { border: 1px solid #D1E1EB; background: #F0F7FA; position: sticky; top: 0; z-index: 10; }
        .stat-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.85em; }
-       .progress-container { background: #E0E0E0; border-radius: 10px; height: 8px; margin-bottom: 8px; overflow: hidden; }
-       .progress-bar { height: 100%; transition: width 0.5s; background: var(--primary); }
-       .brand-chips { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
-       .chip { font-size: 0.65em; padding: 2px 6px; border-radius: 10px; background: #EEE; color: #999; border: 1px solid #DDD; }
+       .progress-container { background: #E0E0E0; border-radius: 10px; height: 10px; margin: 8px 0; overflow: hidden; }
+       .progress-bar { height: 100%; transition: width 0.6s; background: var(--primary); }
+       .brand-chips { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+       .chip { font-size: 0.65em; padding: 3px 8px; border-radius: 12px; background: #EEE; color: #999; border: 1px solid #DDD; }
        .chip.active { background: var(--uni); color: white; border-color: var(--uni); font-weight: bold; }
        .form-row { display: flex; flex-direction: column; margin-bottom: 12px; }
        label { font-size: 0.8em; color: var(--sub); margin-bottom: 4px; }
        input, select { padding: 10px; border: 1px solid #DDD; border-radius: 8px; font-size: 1em; }
        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-       .btn-main { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; background: var(--primary); color: white; margin-top: 5px; }
+       .btn-main { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; background: var(--primary); color: white; font-weight: bold; }
        .table-wrapper { overflow-x: auto; }
        table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
-       th, td { padding: 10px 8px; border-bottom: 1px solid #EEE; text-align: left; }
-       .tag { font-size: 0.75em; padding: 2px 4px; border-radius: 4px; background: #EEE; margin-right: 3px; }
-       .reward-op { color: var(--uni); font-weight: bold; }
-       .reward-am { color: var(--primary); font-weight: bold; }
-       .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
-       .nav-item { text-align: center; font-size: 0.75em; cursor: pointer; color: var(--sub); flex: 1; }
+       th, td { padding: 12px 8px; border-bottom: 1px solid #EEE; text-align: left; }
+       .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
+       .nav-item { text-align: center; font-size: 0.8em; cursor: pointer; color: var(--sub); flex: 1; }
        .nav-item.active { color: var(--primary); font-weight: bold; }
        .hidden { display: none; }
    </style>
@@ -40,12 +37,18 @@
 
 <div class="container">
    <div class="card monitor-card">
-       <div class="stat-box"><span>✈️ <span id="goalNameDisp">里程目標</span></span><span><span id="currentMilesDisp">0</span> / <span id="targetMilesDisp">0</span> AM</span></div>
+       <div class="stat-box">
+           <span style="font-weight:bold;">✈️ <span id="goalNameDisp">里程目標</span></span>
+           <span style="color:var(--primary); font-weight:bold;"><span id="currentMilesDisp">0</span> / <span id="targetMilesDisp">0</span> AM</span>
+       </div>
        <div class="progress-container"><div id="goalBar" class="progress-bar" style="background:var(--secondary);"></div></div>
+       
        <div class="stat-box"><span>💳 星展 10% (上限 $11,363)</span><span>$<span id="dbsSpentDisp">0</span></span></div>
        <div class="progress-container"><div id="dbsBar" class="progress-bar"></div></div>
-       <div class="stat-box" style="color:var(--uni); font-weight:bold;"><span>🦁 Uniopen 任務 ($12,500)</span><span id="uniStatus">0 品牌 (3%)</span></div>
+       
+       <div class="stat-box" style="color:var(--uni); font-weight:bold;"><span>🦁 Uniopen 任務 ($12,500)</span><span id="uniStatus">0 品牌</span></div>
        <div class="progress-container"><div id="uniBar" class="progress-bar" style="background:var(--uni);"></div></div>
+       
        <div class="brand-chips" id="brandChips">
            <span class="chip" data-brand="711">7-11</span><span class="chip" data-brand="starbucks">星巴克</span>
            <span class="chip" data-brand="carrefour">家樂福</span><span class="chip" data-brand="cosmed">康是美</span><span class="chip" data-brand="others">其他統一</span>
@@ -56,43 +59,60 @@
        <div class="card">
            <h2>新增消費</h2>
            <div class="grid-2"><div class="form-row"><label>日期</label><input type="date" id="txDate"></div><div class="form-row"><label>分類</label><select id="txCat"><option>餐飲美食</option><option>交通出行</option><option>購物消費</option><option>居家生活</option><option>休閒娛樂</option><option>其他</option></select></div></div>
-           <div class="form-row"><label>項目名稱</label><input type="text" id="txDesc" placeholder="項目描述"></div>
-           <div class="grid-2"><div class="form-row"><label>金額</label><input type="number" id="txAmt" oninput="recalc()"></div><div class="form-row"><label>卡片</label><select id="txCard" onchange="recalc()"><option value="UNIOPEN">中信 Uniopen</option><option value="DBS">星展傳說對決</option><option value="CUBE_L3">國泰 CUBE</option><option value="OTHER">其他</option></select></div></div>
-           <div class="grid-2"><div class="form-row"><label>支付方式</label><select id="txMethod" onchange="recalc()"><option value="PHYSICAL">實體/感應</option><option value="ICASH_PAY">icash Pay (+4%)</option><option value="AUTO_LOAD">自動加值</option></select></div><div class="form-row"><label>統一品牌</label><select id="txBrand" onchange="recalc()"><option value="NONE">非統一</option><option value="711">7-11</option><option value="starbucks">星巴克</option><option value="carrefour">家樂福</option><option value="cosmed">康是美</option><option value="others">其他統一</option></select></div></div>
-           <div id="prePreview" style="background:#F9F9F9; padding:10px; border-radius:8px; font-size:0.9em; margin-top:10px;">預計回饋：<span id="preTotal" style="font-weight:bold;">0</span><br><small id="preDetail" style="color:var(--sub);"></small></div>
-           <button onclick="commitTx()" class="btn-main">確認記帳</button>
+           <div class="form-row"><label>項目名稱</label><input type="text" id="txDesc" placeholder="例如：統一超商"></div>
+           <div class="grid-2">
+               <div class="form-row"><label>金額</label><input type="number" id="txAmt" oninput="recalc()"></div>
+               <div class="form-row"><label>卡片</label><select id="txCard" onchange="recalc()"><option value="UNIOPEN">中信 Uniopen</option><option value="DBS">星展傳說對決</option><option value="CUBE_L3">國泰 CUBE</option><option value="OTHER">其他</option></select></div>
+           </div>
+           <div class="grid-2">
+               <div class="form-row"><label>支付方式</label><select id="txMethod" onchange="recalc()"><option value="PHYSICAL">實體/感應</option><option value="ICASH_PAY">icash Pay (+4%)</option></select></div>
+               <div class="form-row"><label>統一品牌</label><select id="txBrand" onchange="recalc()"><option value="NONE">非統一</option><option value="711">7-11</option><option value="starbucks">星巴克</option><option value="carrefour">家樂福</option><option value="cosmed">康是美</option><option value="others">其他統一</option></select></div>
+           </div>
+           <div id="prePreview" style="background:#F9F9F9; padding:12px; border-radius:8px; font-size:0.9em; margin-top:10px; border:1px dashed #DDD;">預計回饋：<span id="preTotal">0</span></div>
+           <button onclick="commitTx()" class="btn-main" style="margin-top:15px;">確認記帳</button>
        </div>
    </div>
 
    <div id="sec-miles" class="section hidden">
-       <div class="card"><h2>資產庫存 (AM 換算)</h2><div id="assetSummary"></div></div>
+       <div class="card"><h2>點數資產庫存 (AM 換算)</h2><div id="assetSummary"></div></div>
        <div class="card">
-           <h2>庫存調整</h2>
-           <div class="grid-2"><select id="adjType"><option value="AM">AM</option><option value="DBS_PT">星展</option><option value="CUBE_PT">小樹點</option><option value="OPEN_PT">OP</option></select><input type="number" id="adjVal" placeholder="+/-"></div>
-           <button onclick="commitAdj()" class="btn-main" style="background:var(--secondary);">調整庫存</button>
+           <h2>手動調整點數</h2>
+           <div class="grid-2">
+               <select id="adjType">
+                   <option value="AM">AM 實體里程</option>
+                   <option value="DBS_PT">星展點數</option>
+                   <option value="OPEN_PT">OpenPoint</option>
+                   <option value="HAMI_PT">HamiPoint</option>
+                   <option value="HG_PT">HappyGo</option>
+                   <option value="CUBE_PT">小樹點</option>
+                   <option value="TS_PT">台新點</option>
+               </select>
+               <input type="number" id="adjVal" placeholder="+/- 點數">
+           </div>
+           <button onclick="commitAdj()" class="btn-main" style="background:var(--secondary); margin-top:10px;">調整庫存</button>
        </div>
    </div>
 
    <div id="sec-history" class="section hidden">
        <div class="card">
-           <h2>紀錄與備份</h2>
+           <h2>備份與紀錄</h2>
            <div class="grid-2">
-               <button onclick="exportExcel()" style="background:#2ecc71; color:white; border:none; padding:10px; border-radius:8px;">匯出 Excel</button>
-               <button onclick="document.getElementById('importFile').click()" style="background:#3498db; color:white; border:none; padding:10px; border-radius:8px;">匯入 Excel</button>
+               <button onclick="exportExcel()" style="background:#2ecc71; color:white; border:none; padding:10px; border-radius:8px;">匯出</button>
+               <button onclick="document.getElementById('importFile').click()" style="background:#3498db; color:white; border:none; padding:10px; border-radius:8px;">匯入</button>
                <input type="file" id="importFile" style="display:none;" onchange="importExcel(event)">
            </div>
-           <div class="table-wrapper" style="margin-top:15px;"><table id="txTable"><thead><tr><th>日期</th><th>項目</th><th>回饋</th><th>刪</th></tr></thead><tbody></tbody></table></div>
+           <div class="table-wrapper" style="margin-top:20px;"><table id="txTable"><thead><tr><th>日期</th><th>項目</th><th>類型</th><th>刪</th></tr></thead><tbody></tbody></table></div>
        </div>
    </div>
 
    <div id="sec-settings" class="section hidden">
        <div class="card">
-           <h2>設定目標與比例</h2>
-           <div class="grid-2"><input type="text" id="setGoalName" placeholder="目標名稱"><input type="number" id="setGoalTarget" placeholder="目標 AM"></div>
+           <h2>全點數比例設定 (1點 = ? AM)</h2>
+           <div class="grid-2"><input type="text" id="setGoalName"><input type="number" id="setGoalTarget"></div>
            <div id="rateInputs" class="grid-2" style="margin-top:10px;"></div>
-           <button onclick="saveSettings()" class="btn-main">儲存設定</button>
+           <button onclick="saveSettings()" class="btn-main" style="margin-top:15px;">儲存比例設定</button>
        </div>
-       <div class="card"><h2>支出佔比</h2><canvas id="statChart"></canvas></div>
+       <button onclick="clearAll()" style="width:100%; color:var(--danger); background:none; border:1px solid var(--danger); padding:10px; border-radius:8px;">重置資料</button>
    </div>
 </div>
 
@@ -104,76 +124,101 @@
 </div>
 
 <script>
-   let state = JSON.parse(localStorage.getItem('am_uni_final_v6')) || {
-       records: [], adjusts: [], goal: { name: "里程目標", target: 50000 },
-       rates: { AM: 1, DBS_PT: 2, CUBE_PT: 0.36, OPEN_PT: 0.25 }
+   // 1. 完整點數類型初始化
+   let state = JSON.parse(localStorage.getItem('am_uni_v9_full')) || {
+       records: [], 
+       adjusts: [], 
+       goal: { name: "里程目標", target: 50000 },
+       rates: { 
+           AM: 1, 
+           DBS_PT: 2, 
+           OPEN_PT: 0.25, 
+           HAMI_PT: 0.33, 
+           HG_PT: 0.25, 
+           CUBE_PT: 0.36, 
+           TS_PT: 0.55 
+       }
    };
 
    function getMonthStats() {
        const m = new Date().getMonth();
        const mRecs = state.records.filter(r => new Date(r.date).getMonth() === m);
        const brands = new Set(mRecs.filter(r => r.brand !== 'NONE').map(r => r.brand));
-       const dbsSpent = mRecs.filter(r => r.cardKey === 'DBS').reduce((s, r) => s + r.amt, 0);
-       const uniSpent = mRecs.filter(r => r.cardKey === 'UNIOPEN').reduce((s, r) => s + r.amt, 0);
-       return { brandCount: brands.size, brands: Array.from(brands), dbsSpent, uniSpent };
+       return { brandCount: brands.size, brands: Array.from(brands), 
+                dbsSpent: mRecs.filter(r => r.cardKey === 'DBS').reduce((sum, r) => sum + r.amt, 0),
+                uniSpent: mRecs.filter(r => r.cardKey === 'UNIOPEN').reduce((sum, r) => sum + r.amt, 0) };
    }
 
-   function recalc() {
-       const amt = parseFloat(document.getElementById('txAmt').value) || 0;
-       const card = document.getElementById('txCard').value;
-       const brand = document.getElementById('txBrand').value;
+   function calcTotalAM() {
        const s = getMonthStats();
-       if(card==='UNIOPEN') {
-           let r = (s.brandCount >= 5 || (brand!=='NONE' && !s.brands.includes(brand) && s.brandCount+1 >= 5)) ? 0.07 : 0.03;
-           if(document.getElementById('txMethod').value==='ICASH_PAY') r+=0.04;
-           document.getElementById('preTotal').innerText = Math.round(amt*r) + " OP";
-       } else if(card==='DBS') {
-           let r = s.dbsSpent < 11363 ? 0.1 : 0.012;
-           document.getElementById('preTotal').innerText = Math.round(amt*r*state.rates.DBS_PT) + " AM";
-       }
-   }
-
-   function commitTx() {
-       const amt = parseFloat(document.getElementById('txAmt').value);
-       if(!amt) return;
-       state.records.unshift({ id: Date.now(), date: document.getElementById('txDate').value, cat: document.getElementById('txCat').value, desc: document.getElementById('txDesc').value, amt, cardKey: document.getElementById('txCard').value, method: document.getElementById('txMethod').value, brand: document.getElementById('txBrand').value });
-       save();
-   }
-
-   function commitAdj() {
-       const val = parseFloat(document.getElementById('adjVal').value);
-       if(!val) return;
-       state.adjusts.unshift({ id: Date.now(), date: new Date().toLocaleDateString(), type: document.getElementById('adjType').value, amt: val });
-       save();
+       // 庫存點數換算
+       let total = state.adjusts.reduce((sum, a) => sum + (parseFloat(a.amt) * (state.rates[a.type] || 0)), 0);
+       // 消費紀錄換算
+       state.records.forEach(r => {
+           if(r.cardKey === 'DBS') total += (r.amt * (r.amt <= 11363 ? 0.1 : 0.012) * state.rates.DBS_PT);
+           else if(r.cardKey === 'UNIOPEN') {
+               let rate = (s.brandCount >= 5 ? 0.07 : 0.03) + (r.method === 'ICASH_PAY' ? 0.04 : 0);
+               total += (r.amt * rate * state.rates.OPEN_PT);
+           }
+       });
+       return total;
    }
 
    function refreshUI() {
        const s = getMonthStats();
-       let totalAM = state.adjusts.reduce((sum, a) => sum + (a.amt * state.rates[a.type]), 0);
-       state.records.forEach(r => {
-           if(r.cardKey==='DBS') totalAM += (r.amt * 0.1 * state.rates.DBS_PT);
-           else if(r.cardKey==='UNIOPEN') totalAM += (r.amt * (s.brandCount>=5?0.07:0.03) * state.rates.OPEN_PT);
-       });
+       const totalAM = calcTotalAM();
        document.getElementById('currentMilesDisp').innerText = Math.round(totalAM).toLocaleString();
        document.getElementById('targetMilesDisp').innerText = state.goal.target.toLocaleString();
        document.getElementById('goalBar').style.width = Math.min(100, (totalAM/state.goal.target)*100) + "%";
        document.getElementById('dbsSpentDisp').innerText = Math.round(s.dbsSpent).toLocaleString();
        document.getElementById('dbsBar').style.width = Math.min(100, (s.dbsSpent/11363)*100) + "%";
        document.getElementById('uniBar').style.width = Math.min(100, (s.uniSpent/12500)*100) + "%";
-       document.getElementById('uniStatus').innerText = `${s.brandCount} 品牌 (${s.brandCount>=5?'7%+':'3%'})`;
+       document.getElementById('uniStatus').innerText = `${s.brandCount} 品牌`;
        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', s.brands.includes(c.dataset.brand)));
-       renderHistory(s);
-       renderAsset(totalAM);
+       
+       renderAsset();
+       document.querySelector('#txTable tbody').innerHTML = state.records.map(r => `<tr><td>${r.date.slice(5)}</td><td>${r.desc}</td><td>${r.cardKey}</td><td><button onclick="delRec(${r.id})">❌</button></td></tr>`).join('');
    }
 
-   function renderHistory(s) {
-       document.querySelector('#txTable tbody').innerHTML = state.records.map(r => `
-           <tr><td>${r.date.slice(5)}</td><td>${r.desc}</td><td>${r.cardKey==='UNIOPEN'?'OP':'AM'}</td><td><button onclick="delRec(${r.id})">❌</button></td></tr>
-       `).join('');
+   function renderAsset() {
+       document.getElementById('assetSummary').innerHTML = Object.entries(state.rates).map(([k,v]) => {
+           let count = state.adjusts.filter(a=>a.type===k).reduce((sum,a)=>sum+parseFloat(a.amt), 0);
+           return `<div class="stat-box" style="border-bottom:1px solid #EEE; padding:5px 0;"><span>${k}</span><span>${Math.round(count)} (≈${Math.round(count*v)} AM)</span></div>`;
+       }).join('');
    }
 
-   function renderAsset(total) {
-       document.getElementById('assetSummary').innerHTML = `<div class="stat-box"><span>預估總里程</span><span class="reward-am">${Math.round(total)} AM</span></div>`;
+   function recalc() {
+       const amt = parseFloat(document.getElementById('txAmt').value) || 0;
+       const card = document.getElementById('txCard').value;
+       const s = getMonthStats();
+       let res = "";
+       if(card==='UNIOPEN') res = "預計 " + Math.round(amt*0.07) + " OP";
+       else if(card==='DBS') res = "預計 " + Math.round(amt*0.1*state.rates.DBS_PT) + " AM";
+       document.getElementById('preTotal').innerText = res;
+   }
+
+   function commitTx() {
+       state.records.unshift({ id: Date.now(), date: document.getElementById('txDate').value, cat: document.getElementById('txCat').value, desc: document.getElementById('txDesc').value, amt: parseFloat(document.getElementById('txAmt').value), cardKey: document.getElementById('txCard').value, method: document.getElementById('txMethod').value, brand: document.getElementById('txBrand').value });
+       save();
+   }
+
+   function commitAdj() {
+       state.adjusts.unshift({ id: Date.now(), type: document.getElementById('adjType').value, amt: parseFloat(document.getElementById('adjVal').value) });
+       save();
+   }
+
+   function saveSettings() {
+       state.goal.target = parseInt(document.getElementById('setGoalTarget').value);
+       Object.keys(state.rates).forEach(k => state.rates[k] = parseFloat(document.getElementById('rate_'+k).value));
+       save();
+       alert("比例已儲存");
+   }
+
+   function nav(id) {
+       document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+       document.getElementById('sec-' + id).classList.remove('hidden');
+       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+       event.currentTarget.classList.add('active');
    }
 
    function exportExcel() {
@@ -186,41 +231,18 @@
    function importExcel(e) {
        const reader = new FileReader();
        reader.onload = (f) => {
-           const data = new Uint8Array(f.target.result);
-           const workbook = XLSX.read(data, {type: 'array'});
-           state.records = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-           save();
-           location.reload();
+           state.records = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(f.target.result), {type: 'array'}).Sheets["Records"]);
+           save(); location.reload();
        };
        reader.readAsArrayBuffer(e.target.files[0]);
    }
 
-   function saveSettings() {
-       state.goal.name = document.getElementById('setGoalName').value;
-       state.goal.target = parseInt(document.getElementById('setGoalTarget').value);
-       Object.keys(state.rates).forEach(k => state.rates[k] = parseFloat(document.getElementById('rate_'+k).value));
-       save();
-   }
-
-   function nav(id) {
-       document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-       document.getElementById('sec-' + id).classList.remove('hidden');
-       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-       event.currentTarget.classList.add('active');
-       if(id==='settings') renderChart();
-   }
-
-   function renderChart() {
-       const ctx = document.getElementById('statChart').getContext('2d');
-       if(window.myChart) window.myChart.destroy();
-       const data = ["餐飲美食","交通出行","購物消費","居家生活","休閒娛樂","其他"].map(c => state.records.reduce((sum, r) => r.cat===c?sum+r.amt:sum, 0));
-       window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ["餐飲","交通","購物","居家","休閒","其他"], datasets: [{ data, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40'] }] }});
-   }
-
-   function save() { localStorage.setItem('am_uni_final_v6', JSON.stringify(state)); refreshUI(); }
-   function delRec(id) { if(confirm("刪除？")) { state.records = state.records.filter(r=>r.id!==id); save(); } }
+   function save() { localStorage.setItem('am_uni_v9_full', JSON.stringify(state)); refreshUI(); }
+   function delRec(id) { state.records = state.records.filter(r=>r.id!==id); save(); }
+   function clearAll() { localStorage.clear(); location.reload(); }
 
    document.getElementById('txDate').valueAsDate = new Date();
+   document.getElementById('setGoalTarget').value = state.goal.target;
    document.getElementById('rateInputs').innerHTML = Object.keys(state.rates).map(k => `<div class="form-row"><label>${k} 比例</label><input type="number" step="0.01" id="rate_${k}" value="${state.rates[k]}"></div>`).join('');
    refreshUI();
 </script>
