@@ -3,45 +3,33 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>AM 領航員 x Uniopen：專業全能版</title>
+   <title>AM 領航員 x Uniopen：終極監視版</title>
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
    <style>
-       :root {
-           --primary: #5D8AA8; --secondary: #88B04B; --danger: #E07A5F; --uni: #FF8C00;
-           --bg: #F4F7F6; --card: #FFFFFF; --text: #2C3E50; --sub: #7F8C8D;
-       }
+       :root { --primary: #5D8AA8; --secondary: #88B04B; --danger: #E07A5F; --uni: #FF8C00; --bg: #F4F7F6; --card: #FFFFFF; --text: #2C3E50; --sub: #7F8C8D; }
        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px 15px 80px 15px; }
        .container { max-width: 900px; margin: 0 auto; }
        .card { background: var(--card); border-radius: 12px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
        h2 { font-size: 1.1em; border-left: 4px solid var(--primary); padding-left: 10px; margin: 0 0 15px 0; }
-       
-       /* 儀表板 */
        .monitor-card { border: 1px solid #D1E1EB; background: #F0F7FA; position: sticky; top: 0; z-index: 10; }
        .stat-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.85em; }
        .progress-container { background: #E0E0E0; border-radius: 10px; height: 8px; margin-bottom: 8px; overflow: hidden; }
        .progress-bar { height: 100%; transition: width 0.5s; background: var(--primary); }
-
-       /* Uniopen 任務 */
        .brand-chips { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
        .chip { font-size: 0.65em; padding: 2px 6px; border-radius: 10px; background: #EEE; color: #999; border: 1px solid #DDD; }
        .chip.active { background: var(--uni); color: white; border-color: var(--uni); font-weight: bold; }
-
-       /* 表單 */
        .form-row { display: flex; flex-direction: column; margin-bottom: 12px; }
        label { font-size: 0.8em; color: var(--sub); margin-bottom: 4px; }
        input, select { padding: 10px; border: 1px solid #DDD; border-radius: 8px; font-size: 1em; }
        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
        .btn-main { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; background: var(--primary); color: white; margin-top: 5px; }
-
-       /* 表格與列表 */
        .table-wrapper { overflow-x: auto; }
        table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
        th, td { padding: 10px 8px; border-bottom: 1px solid #EEE; text-align: left; }
-       .tag { font-size: 0.7em; padding: 2px 4px; border-radius: 4px; background: #EEE; margin-right: 3px; }
+       .tag { font-size: 0.75em; padding: 2px 4px; border-radius: 4px; background: #EEE; margin-right: 3px; }
        .reward-op { color: var(--uni); font-weight: bold; }
        .reward-am { color: var(--primary); font-weight: bold; }
-
        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
        .nav-item { text-align: center; font-size: 0.75em; cursor: pointer; color: var(--sub); flex: 1; }
        .nav-item.active { color: var(--primary); font-weight: bold; }
@@ -52,142 +40,59 @@
 
 <div class="container">
    <div class="card monitor-card">
-       <div class="stat-box">
-           <span>✈️ <span id="goalNameDisp">里程目標</span></span>
-           <span><span id="currentMilesDisp">0</span> / <span id="targetMilesDisp">0</span> AM</span>
-       </div>
+       <div class="stat-box"><span>✈️ <span id="goalNameDisp">里程目標</span></span><span><span id="currentMilesDisp">0</span> / <span id="targetMilesDisp">0</span> AM</span></div>
        <div class="progress-container"><div id="goalBar" class="progress-bar" style="background:var(--secondary);"></div></div>
-
-       <div class="stat-box">
-           <span>💳 星展 10% (上限 $11,363)</span>
-           <span>已刷 $<span id="dbsSpentDisp">0</span></span>
-       </div>
+       <div class="stat-box"><span>💳 星展 10% (上限 $11,363)</span><span>$<span id="dbsSpentDisp">0</span></span></div>
        <div class="progress-container"><div id="dbsBar" class="progress-bar"></div></div>
-
-       <div class="stat-box" style="color:var(--uni); font-weight:bold;">
-           <span>🦁 Uniopen 任務 ($12,500)</span>
-           <span id="uniStatus">0 品牌 (3%)</span>
-       </div>
+       <div class="stat-box" style="color:var(--uni); font-weight:bold;"><span>🦁 Uniopen 任務 ($12,500)</span><span id="uniStatus">0 品牌 (3%)</span></div>
        <div class="progress-container"><div id="uniBar" class="progress-bar" style="background:var(--uni);"></div></div>
-       
-       <div class="stat-box" style="font-size: 0.75em; color: var(--sub);">
-           <span>📱 icash Pay 加碼 (上限 $3,750)</span>
-           <span>$<span id="icashSpentDisp">0</span></span>
-       </div>
-       <div class="progress-container"><div id="icashBar" class="progress-bar" style="background:#FFB347;"></div></div>
-
        <div class="brand-chips" id="brandChips">
            <span class="chip" data-brand="711">7-11</span><span class="chip" data-brand="starbucks">星巴克</span>
-           <span class="chip" data-brand="carrefour">家樂福</span><span class="chip" data-brand="cosmed">康是美</span>
-           <span class="chip" data-brand="others">其他統一</span>
+           <span class="chip" data-brand="carrefour">家樂福</span><span class="chip" data-brand="cosmed">康是美</span><span class="chip" data-brand="others">其他統一</span>
        </div>
    </div>
 
    <div id="sec-entry" class="section">
        <div class="card">
-           <h2>新增消費紀錄</h2>
-           <div class="grid-2">
-               <div class="form-row"><label>日期</label><input type="date" id="txDate"></div>
-               <div class="form-row"><label>分類</label>
-                   <select id="txCat">
-                       <option value="餐飲美食">🍽️ 餐飲美食</option><option value="交通出行">🚗 交通出行</option>
-                       <option value="購物消費">🛍️ 購物消費</option><option value="居家生活">🏠 居家生活</option>
-                       <option value="休閒娛樂">🎮 休閒娛樂</option><option value="其他">❓ 其他</option>
-                   </select>
-               </div>
-           </div>
-           <div class="form-row"><label>項目名稱</label><input type="text" id="txDesc" placeholder="例如：百貨公司購物"></div>
-           <div class="grid-2">
-               <div class="form-row"><label>金額 (TWD)</label><input type="number" id="txAmt" oninput="recalc()"></div>
-               <div class="form-row"><label>支付卡片</label>
-                   <select id="txCard" onchange="recalc()">
-                       <option value="UNIOPEN">中信 Uniopen</option>
-                       <option value="DBS">星展-傳說對決 (10%)</option>
-                       <option value="CUBE_L3">國泰-CUBE (3%)</option>
-                       <option value="FLYGO">台新-飛狗 (5%)</option>
-                       <option value="OTHER">其他</option>
-                   </select>
-               </div>
-           </div>
-           <div class="grid-2">
-                <div class="form-row"><label>支付方式</label>
-                    <select id="txMethod" onchange="recalc()">
-                        <option value="PHYSICAL">實體卡/感應</option>
-                        <option value="ICASH_PAY">icash Pay (+4%)</option>
-                        <option value="AUTO_LOAD">自動加值</option>
-                    </select>
-                </div>
-                <div class="form-row"><label>統一品牌</label>
-                    <select id="txBrand" onchange="recalc()">
-                        <option value="NONE">非統一集團</option>
-                        <option value="711">7-11</option><option value="starbucks">星巴克</option>
-                        <option value="carrefour">家樂福</option><option value="cosmed">康是美</option>
-                        <option value="others">其他統一品牌</option>
-                    </select>
-                </div>
-           </div>
-           <div class="form-row"><label>額外累積會員</label>
-                <select id="txMem" onchange="recalc()">
-                    <option value="NONE">無</option><option value="OPEN">OpenPoint</option>
-                    <option value="HG">HappyGo</option><option value="HAMI">HamiPoint</option>
-                </select>
-           </div>
-           <div id="prePreview" style="background:#F9F9F9; padding:12px; border-radius:8px; font-size:0.9em; border: 1px solid #EEE;">
-               預計回饋：<span id="preTotal" style="font-weight:bold;">0</span><br>
-               <small id="preDetail" style="color:var(--sub);"></small>
-           </div>
-           <button onclick="commitTx()" class="btn-main">確認新增紀錄</button>
+           <h2>新增消費</h2>
+           <div class="grid-2"><div class="form-row"><label>日期</label><input type="date" id="txDate"></div><div class="form-row"><label>分類</label><select id="txCat"><option>餐飲美食</option><option>交通出行</option><option>購物消費</option><option>居家生活</option><option>休閒娛樂</option><option>其他</option></select></div></div>
+           <div class="form-row"><label>項目名稱</label><input type="text" id="txDesc" placeholder="項目描述"></div>
+           <div class="grid-2"><div class="form-row"><label>金額</label><input type="number" id="txAmt" oninput="recalc()"></div><div class="form-row"><label>卡片</label><select id="txCard" onchange="recalc()"><option value="UNIOPEN">中信 Uniopen</option><option value="DBS">星展傳說對決</option><option value="CUBE_L3">國泰 CUBE</option><option value="OTHER">其他</option></select></div></div>
+           <div class="grid-2"><div class="form-row"><label>支付方式</label><select id="txMethod" onchange="recalc()"><option value="PHYSICAL">實體/感應</option><option value="ICASH_PAY">icash Pay (+4%)</option><option value="AUTO_LOAD">自動加值</option></select></div><div class="form-row"><label>統一品牌</label><select id="txBrand" onchange="recalc()"><option value="NONE">非統一</option><option value="711">7-11</option><option value="starbucks">星巴克</option><option value="carrefour">家樂福</option><option value="cosmed">康是美</option><option value="others">其他統一</option></select></div></div>
+           <div id="prePreview" style="background:#F9F9F9; padding:10px; border-radius:8px; font-size:0.9em; margin-top:10px;">預計回饋：<span id="preTotal" style="font-weight:bold;">0</span><br><small id="preDetail" style="color:var(--sub);"></small></div>
+           <button onclick="commitTx()" class="btn-main">確認記帳</button>
        </div>
    </div>
 
    <div id="sec-miles" class="section hidden">
+       <div class="card"><h2>資產庫存 (AM 換算)</h2><div id="assetSummary"></div></div>
        <div class="card">
-           <h2>資產統計 (換算後 AM)</h2>
-           <div id="assetSummary"></div>
-       </div>
-       <div class="card">
-           <h2>庫存調整與期初</h2>
-           <div class="grid-2">
-               <select id="adjType">
-                   <option value="AM">AM 實體里程</option><option value="DBS_PT">星展積分</option>
-                   <option value="CUBE_PT">小樹點</option><option value="OPEN_PT">OpenPoint</option>
-                   <option value="HAMI_PT">HamiPoint</option><option value="HG_PT">HappyGo</option>
-               </select>
-               <input type="number" id="adjVal" placeholder="+/- 數量">
-           </div>
-           <input type="text" id="adjReason" placeholder="原因 (如：1月薪轉里程匯入)" style="width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #DDD;">
-           <button onclick="commitAdj()" class="btn-main" style="background:var(--secondary);">執行變動</button>
-       </div>
-       <div class="card">
-           <h2>里程流水帳 (近期 10 筆)</h2>
-           <div class="table-wrapper"><table id="mileLogTable"><thead><tr><th>日期</th><th>類型</th><th>變動(AM)</th><th>說明</th></tr></thead><tbody></tbody></table></div>
+           <h2>庫存調整</h2>
+           <div class="grid-2"><select id="adjType"><option value="AM">AM</option><option value="DBS_PT">星展</option><option value="CUBE_PT">小樹點</option><option value="OPEN_PT">OP</option></select><input type="number" id="adjVal" placeholder="+/-"></div>
+           <button onclick="commitAdj()" class="btn-main" style="background:var(--secondary);">調整庫存</button>
        </div>
    </div>
 
    <div id="sec-history" class="section hidden">
        <div class="card">
-           <h2>交易歷史紀錄</h2>
-           <button onclick="exportExcel()" style="background:#2ecc71; color:white; border:none; padding:8px 15px; border-radius:6px; margin-bottom:10px; cursor:pointer;">匯出 Excel</button>
-           <div class="table-wrapper"><table id="txTable"><thead><tr><th>日期</th><th>項目</th><th>回饋</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+           <h2>紀錄與備份</h2>
+           <div class="grid-2">
+               <button onclick="exportExcel()" style="background:#2ecc71; color:white; border:none; padding:10px; border-radius:8px;">匯出 Excel</button>
+               <button onclick="document.getElementById('importFile').click()" style="background:#3498db; color:white; border:none; padding:10px; border-radius:8px;">匯入 Excel</button>
+               <input type="file" id="importFile" style="display:none;" onchange="importExcel(event)">
+           </div>
+           <div class="table-wrapper" style="margin-top:15px;"><table id="txTable"><thead><tr><th>日期</th><th>項目</th><th>回饋</th><th>刪</th></tr></thead><tbody></tbody></table></div>
        </div>
    </div>
 
    <div id="sec-settings" class="section hidden">
        <div class="card">
-           <h2>里程目標與比例設定</h2>
-           <div class="grid-2">
-                <div class="form-row"><label>目標名稱</label><input type="text" id="setGoalName"></div>
-                <div class="form-row"><label>目標數值 (AM)</label><input type="number" id="setGoalTarget"></div>
-           </div>
-           <h3>點數兌換 AM 比例 (1 點 = ? AM)</h3>
-           <div id="rateInputs" class="grid-2" style="font-size: 0.85em;"></div>
-           <button onclick="saveSettings()" class="btn-main" style="margin-top:15px;">儲存並套用</button>
+           <h2>設定目標與比例</h2>
+           <div class="grid-2"><input type="text" id="setGoalName" placeholder="目標名稱"><input type="number" id="setGoalTarget" placeholder="目標 AM"></div>
+           <div id="rateInputs" class="grid-2" style="margin-top:10px;"></div>
+           <button onclick="saveSettings()" class="btn-main">儲存設定</button>
        </div>
-       <div class="card">
-           <h2>支出類別佔比</h2>
-           <canvas id="statChart"></canvas>
-       </div>
-       <button onclick="clearAll()" style="width:100%; color:var(--danger); background:none; border:1px solid var(--danger); padding:10px; border-radius:8px;">清空所有資料</button>
+       <div class="card"><h2>支出佔比</h2><canvas id="statChart"></canvas></div>
    </div>
 </div>
 
@@ -199,189 +104,102 @@
 </div>
 
 <script>
-   // 1. 資料初始化 (包含完整比例清單)
-   let state = JSON.parse(localStorage.getItem('am_uni_pro_v5')) || {
-       records: [], adjusts: [],
-       goal: { name: "里程目標", target: 50000 },
-       rates: { 
-           AM: 1, DBS_PT: 2, CUBE_PT: 0.36, OPEN_PT: 0.25, 
-           HAMI_PT: 0.33, HG_PT: 0.25, TS_PT: 0.55 
-       }
+   let state = JSON.parse(localStorage.getItem('am_uni_final_v6')) || {
+       records: [], adjusts: [], goal: { name: "里程目標", target: 50000 },
+       rates: { AM: 1, DBS_PT: 2, CUBE_PT: 0.36, OPEN_PT: 0.25 }
    };
 
-   const LIMITS = { DBS: 11363, UNI_加碼: 12500, ICASH: 3750 };
-
-   // 2. 核心統計邏輯
    function getMonthStats() {
        const m = new Date().getMonth();
        const mRecs = state.records.filter(r => new Date(r.date).getMonth() === m);
        const brands = new Set(mRecs.filter(r => r.brand !== 'NONE').map(r => r.brand));
-       const uniSpent = mRecs.filter(r => r.cardKey === 'UNIOPEN').reduce((s, r) => s + r.amt, 0);
-       const icashSpent = mRecs.filter(r => r.cardKey === 'UNIOPEN' && r.method === 'ICASH_PAY').reduce((s, r) => s + r.amt, 0);
        const dbsSpent = mRecs.filter(r => r.cardKey === 'DBS').reduce((s, r) => s + r.amt, 0);
-       return { brandCount: brands.size, brands: Array.from(brands), uniSpent, icashSpent, dbsSpent };
+       const uniSpent = mRecs.filter(r => r.cardKey === 'UNIOPEN').reduce((s, r) => s + r.amt, 0);
+       return { brandCount: brands.size, brands: Array.from(brands), dbsSpent, uniSpent };
    }
 
    function recalc() {
        const amt = parseFloat(document.getElementById('txAmt').value) || 0;
        const card = document.getElementById('txCard').value;
        const brand = document.getElementById('txBrand').value;
-       const method = document.getElementById('txMethod').value;
-       const stats = getMonthStats();
-
-       let amV = 0; let opV = 0; let det = "";
-
-       if (card === 'UNIOPEN') {
-           let rate = 0.03; // 基本 3%
-           if (stats.brandCount >= 5 || (brand!=='NONE' && !stats.brands.includes(brand) && stats.brandCount+1 >= 5)) rate += 0.04;
-           if (method === 'ICASH_PAY') rate += 0.04;
-           opV = Math.round(amt * rate);
-           det = `中信 Uniopen (以 ${Math.round(rate*100)}% 計算)`;
-           document.getElementById('preTotal').innerText = opV + " OPENPOINT";
-       } else if (card === 'DBS') {
-           let rate = (stats.dbsSpent < LIMITS.DBS) ? 0.1 : 0.012;
-           amV = Math.round(amt * rate * state.rates.DBS_PT);
-           det = `星展傳說對決 (約 ${amV} AM)`;
-           document.getElementById('preTotal').innerText = amV + " AM";
-       } else if (card === 'CUBE_L3') {
-           amV = Math.round(amt * 0.03 * state.rates.CUBE_PT);
-           document.getElementById('preTotal').innerText = amV + " AM";
+       const s = getMonthStats();
+       if(card==='UNIOPEN') {
+           let r = (s.brandCount >= 5 || (brand!=='NONE' && !s.brands.includes(brand) && s.brandCount+1 >= 5)) ? 0.07 : 0.03;
+           if(document.getElementById('txMethod').value==='ICASH_PAY') r+=0.04;
+           document.getElementById('preTotal').innerText = Math.round(amt*r) + " OP";
+       } else if(card==='DBS') {
+           let r = s.dbsSpent < 11363 ? 0.1 : 0.012;
+           document.getElementById('preTotal').innerText = Math.round(amt*r*state.rates.DBS_PT) + " AM";
        }
-       document.getElementById('preDetail').innerText = det;
    }
 
-   // 3. 動作執行
    function commitTx() {
        const amt = parseFloat(document.getElementById('txAmt').value);
        if(!amt) return;
-       state.records.unshift({
-           id: Date.now(), date: document.getElementById('txDate').value,
-           cat: document.getElementById('txCat').value, desc: document.getElementById('txDesc').value,
-           amt, cardKey: document.getElementById('txCard').value, 
-           method: document.getElementById('txMethod').value, brand: document.getElementById('txBrand').value,
-           memKey: document.getElementById('txMem').value
-       });
+       state.records.unshift({ id: Date.now(), date: document.getElementById('txDate').value, cat: document.getElementById('txCat').value, desc: document.getElementById('txDesc').value, amt, cardKey: document.getElementById('txCard').value, method: document.getElementById('txMethod').value, brand: document.getElementById('txBrand').value });
        save();
-       alert("記帳成功！");
    }
 
    function commitAdj() {
        const val = parseFloat(document.getElementById('adjVal').value);
        if(!val) return;
-       state.adjusts.unshift({
-           id: Date.now(), date: new Date().toLocaleDateString(),
-           type: document.getElementById('adjType').value, amt: val, reason: document.getElementById('adjReason').value
-       });
+       state.adjusts.unshift({ id: Date.now(), date: new Date().toLocaleDateString(), type: document.getElementById('adjType').value, amt: val });
        save();
-       alert("庫存變動已存檔");
    }
 
-   // 4. UI 渲染
    function refreshUI() {
        const s = getMonthStats();
-       const totalAM = calcTotalAM();
-       
+       let totalAM = state.adjusts.reduce((sum, a) => sum + (a.amt * state.rates[a.type]), 0);
+       state.records.forEach(r => {
+           if(r.cardKey==='DBS') totalAM += (r.amt * 0.1 * state.rates.DBS_PT);
+           else if(r.cardKey==='UNIOPEN') totalAM += (r.amt * (s.brandCount>=5?0.07:0.03) * state.rates.OPEN_PT);
+       });
        document.getElementById('currentMilesDisp').innerText = Math.round(totalAM).toLocaleString();
        document.getElementById('targetMilesDisp').innerText = state.goal.target.toLocaleString();
-       document.getElementById('goalNameDisp').innerText = state.goal.name;
        document.getElementById('goalBar').style.width = Math.min(100, (totalAM/state.goal.target)*100) + "%";
-
        document.getElementById('dbsSpentDisp').innerText = Math.round(s.dbsSpent).toLocaleString();
-       document.getElementById('dbsBar').style.width = Math.min(100, (s.dbsSpent/LIMITS.DBS)*100) + "%";
-
+       document.getElementById('dbsBar').style.width = Math.min(100, (s.dbsSpent/11363)*100) + "%";
+       document.getElementById('uniBar').style.width = Math.min(100, (s.uniSpent/12500)*100) + "%";
        document.getElementById('uniStatus').innerText = `${s.brandCount} 品牌 (${s.brandCount>=5?'7%+':'3%'})`;
-       document.getElementById('uniBar').style.width = Math.min(100, (s.uniSpent/LIMITS.UNI_加碼)*100) + "%";
-
-       document.getElementById('icashSpentDisp').innerText = Math.round(s.icashSpent).toLocaleString();
-       document.getElementById('icashBar').style.width = Math.min(100, (s.icashSpent/LIMITS.ICASH)*100) + "%";
-       
        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', s.brands.includes(c.dataset.brand)));
-
-       renderAsset();
-       renderHistory();
-       renderLog();
+       renderHistory(s);
+       renderAsset(totalAM);
    }
 
-   function calcTotalAM() {
-       let m = state.records.reduce((sum, r) => {
-           if(r.cardKey === 'DBS') return sum + (r.amt * 0.1 * state.rates.DBS_PT);
-           if(r.cardKey === 'CUBE_L3') return sum + (r.amt * 0.03 * state.rates.CUBE_PT);
-           if(r.cardKey === 'UNIOPEN') {
-               const s = getMonthStats(); // 動態抓取任務狀態
-               let rate = (s.brandCount>=5?0.07:0.03) + (r.method==='ICASH_PAY'?0.04:0);
-               return sum + (r.amt * rate * state.rates.OPEN_PT);
-           }
-           return sum + (r.amt * 0.003); // 其他預設
-       }, 0);
-       state.adjusts.forEach(a => m += a.amt * (state.rates[a.type] || 0));
-       return m;
-   }
-
-   function renderAsset() {
-       const s = getMonthStats();
-       const assets = { AM: 0, DBS_PT: 0, CUBE_PT: 0, OPEN_PT: 0, HAMI_PT: 0, HG_PT: 0 };
-       state.records.forEach(r => {
-           if(r.cardKey === 'DBS') assets.DBS_PT += r.amt * 0.1;
-           if(r.cardKey === 'CUBE_L3') assets.CUBE_PT += r.amt * 0.03;
-           if(r.cardKey === 'UNIOPEN') {
-               let rate = (s.brandCount>=5?0.07:0.03) + (r.method==='ICASH_PAY'?0.04:0);
-               assets.OPEN_PT += r.amt * rate;
-           }
-       });
-       state.adjusts.forEach(a => assets[a.type] += a.amt);
-
-       document.getElementById('assetSummary').innerHTML = Object.entries(assets).map(([k,v]) => `
-           <div class="stat-box" style="border-bottom: 1px solid #EEE; padding: 4px 0;">
-               <span>${k}</span><span>${Math.round(v).toLocaleString()} (≈ ${Math.round(v * state.rates[k] || 0)} AM)</span>
-           </div>
+   function renderHistory(s) {
+       document.querySelector('#txTable tbody').innerHTML = state.records.map(r => `
+           <tr><td>${r.date.slice(5)}</td><td>${r.desc}</td><td>${r.cardKey==='UNIOPEN'?'OP':'AM'}</td><td><button onclick="delRec(${r.id})">❌</button></td></tr>
        `).join('');
    }
 
-   function renderHistory() {
-       const s = getMonthStats();
-       document.querySelector('#txTable tbody').innerHTML = state.records.map(r => {
-           let rw = "";
-           if(r.cardKey === 'UNIOPEN') {
-               let rate = (s.brandCount>=5?0.07:0.03) + (r.method==='ICASH_PAY'?0.04:0);
-               rw = `<span class="reward-op">${Math.round(r.amt * rate)} OP</span>`;
-           } else if(r.cardKey === 'DBS') {
-               rw = `<span class="reward-am">${Math.round(r.amt * 0.1 * state.rates.DBS_PT)} AM</span>`;
-           } else { rw = `<span>-</span>`; }
-           return `<tr><td>${r.date.slice(5)}</td><td><b>${r.desc}</b><br><span class="tag">${r.cat}</span></td><td>${rw}</td><td><button onclick="delRec(${r.id})" style="border:none; color:red; background:none;">刪</button></td></tr>`;
-       }).join('');
+   function renderAsset(total) {
+       document.getElementById('assetSummary').innerHTML = `<div class="stat-box"><span>預估總里程</span><span class="reward-am">${Math.round(total)} AM</span></div>`;
    }
 
-   function renderLog() {
-        document.querySelector('#mileLogTable tbody').innerHTML = state.adjusts.slice(0, 10).map(a => `
-            <tr><td>${a.date}</td><td>調整</td><td style="color:${a.amt>=0?'green':'red'}">${Math.round(a.amt * state.rates[a.type])}</td><td>${a.reason}</td></tr>
-        `).join('');
+   function exportExcel() {
+       const ws = XLSX.utils.json_to_sheet(state.records);
+       const wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, ws, "Records");
+       XLSX.writeFile(wb, "mileage_backup.xlsx");
+   }
+
+   function importExcel(e) {
+       const reader = new FileReader();
+       reader.onload = (f) => {
+           const data = new Uint8Array(f.target.result);
+           const workbook = XLSX.read(data, {type: 'array'});
+           state.records = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+           save();
+           location.reload();
+       };
+       reader.readAsArrayBuffer(e.target.files[0]);
    }
 
    function saveSettings() {
        state.goal.name = document.getElementById('setGoalName').value;
        state.goal.target = parseInt(document.getElementById('setGoalTarget').value);
-       Object.keys(state.rates).forEach(k => {
-           const input = document.getElementById('rate_'+k);
-           if(input) state.rates[k] = parseFloat(input.value);
-       });
+       Object.keys(state.rates).forEach(k => state.rates[k] = parseFloat(document.getElementById('rate_'+k).value));
        save();
-       alert("設定儲存並重新計算完成");
-   }
-
-   function exportExcel() {
-       const data = state.records.map(r => ({ 日期: r.date, 分類: r.cat, 項目: r.desc, 金額: r.amt, 卡片: r.cardKey, 方式: r.method }));
-       const ws = XLSX.utils.json_to_sheet(data);
-       const wb = XLSX.utils.book_new();
-       XLSX.utils.book_append_sheet(wb, ws, "消費紀錄");
-       XLSX.writeFile(wb, "里程回饋監視_匯出.xlsx");
-   }
-
-   function renderChart() {
-       const cats = ["餐飲美食", "交通出行", "購物消費", "居家生活", "休閒娛樂", "其他"];
-       const data = cats.map(c => state.records.reduce((sum, r) => r.cat === c ? sum + r.amt : sum, 0));
-       const ctx = document.getElementById('statChart').getContext('2d');
-       if(window.myChart) window.myChart.destroy();
-       window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: cats, datasets: [{ data, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40'] }] }});
    }
 
    function nav(id) {
@@ -389,20 +207,21 @@
        document.getElementById('sec-' + id).classList.remove('hidden');
        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
        event.currentTarget.classList.add('active');
-       if(id === 'settings') renderChart();
+       if(id==='settings') renderChart();
    }
 
-   function save() { localStorage.setItem('am_uni_pro_v5', JSON.stringify(state)); refreshUI(); }
-   function delRec(id) { if(confirm("確定刪除？")) { state.records = state.records.filter(r=>r.id!==id); save(); } }
-   function clearAll() { if(confirm("這將會清除所有記帳紀錄與庫存調整，確定嗎？")) { localStorage.clear(); location.reload(); } }
+   function renderChart() {
+       const ctx = document.getElementById('statChart').getContext('2d');
+       if(window.myChart) window.myChart.destroy();
+       const data = ["餐飲美食","交通出行","購物消費","居家生活","休閒娛樂","其他"].map(c => state.records.reduce((sum, r) => r.cat===c?sum+r.amt:sum, 0));
+       window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ["餐飲","交通","購物","居家","休閒","其他"], datasets: [{ data, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40'] }] }});
+   }
 
-   // 初始化
+   function save() { localStorage.setItem('am_uni_final_v6', JSON.stringify(state)); refreshUI(); }
+   function delRec(id) { if(confirm("刪除？")) { state.records = state.records.filter(r=>r.id!==id); save(); } }
+
    document.getElementById('txDate').valueAsDate = new Date();
-   document.getElementById('setGoalName').value = state.goal.name;
-   document.getElementById('setGoalTarget').value = state.goal.target;
-   document.getElementById('rateInputs').innerHTML = Object.keys(state.rates).map(k => `
-        <div class="form-row"><label>${k} 兌換比</label><input type="number" step="0.01" id="rate_${k}" value="${state.rates[k]}"></div>
-   `).join('');
+   document.getElementById('rateInputs').innerHTML = Object.keys(state.rates).map(k => `<div class="form-row"><label>${k} 比例</label><input type="number" step="0.01" id="rate_${k}" value="${state.rates[k]}"></div>`).join('');
    refreshUI();
 </script>
 </body>
