@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AM 領航員：里程流水帳 (含 LINE POINTS)</title>
+  <title>AM 領航員：全功能旗艦版 v17</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
   <style>
-      :root { --primary: #5D8AA8; --secondary: #88B04B; --danger: #E07A5F; --uni: #FF8C00; --bg: #F4F7F6; --card: #FFFFFF; --text: #2C3E50; --sub: #7F8C8D; }
+      :root { --primary: #5D8AA8; --secondary: #88B04B; --danger: #E07A5F; --uni: #FF8C00; --cube: #00A36C; --dbs: #003399; --bg: #F4F7F6; --card: #FFFFFF; --text: #2C3E50; --sub: #7F8C8D; }
       body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px 15px 80px 15px; }
       .container { max-width: 900px; margin: 0 auto; }
       .card { background: var(--card); border-radius: 12px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
@@ -25,15 +25,15 @@
       .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       .btn-main { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; background: var(--primary); color: white; font-weight: bold; }
       .table-wrapper { overflow-x: auto; }
-      table { width: 100%; border-collapse: collapse; font-size: 0.85em; min-width: 400px; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.85em; min-width: 450px; }
       th, td { padding: 12px 8px; border-bottom: 1px solid #EEE; text-align: left; }
       .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
       .nav-item { text-align: center; font-size: 0.8em; cursor: pointer; color: var(--sub); flex: 1; }
       .nav-item.active { color: var(--primary); font-weight: bold; }
       .hidden { display: none; }
       .reward-tag { font-size: 0.8em; padding: 2px 5px; border-radius: 4px; background: #f0f0f0; margin-top: 2px; display: inline-block; }
-      .ledger-manual { color: #88B04B; font-weight: bold; }
-      .ledger-auto { color: #5D8AA8; }
+      .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+      .asset-item { background: #f9f9f9; padding: 10px; border-radius: 8px; border-left: 3px solid var(--primary); }
   </style>
 </head>
 <body>
@@ -41,106 +41,110 @@
 <div class="container">
   <div class="card monitor-card">
       <div class="stat-box">
-          <span style="font-weight:bold;">✈️ <span id="goalNameDisp">里程目標</span></span>
+          <span style="font-weight:bold;">✈️ 里程目標進度</span>
           <span style="color:var(--primary); font-weight:bold;"><span id="currentMilesDisp">0</span> / <span id="targetMilesDisp">0</span> AM</span>
       </div>
       <div class="progress-container"><div id="goalBar" class="progress-bar" style="background:var(--secondary);"></div></div>
-
+      
       <div class="stat-box"><span>💳 星展 10% (上限 $11,363)</span><span>$<span id="dbsSpentDisp">0</span></span></div>
-      <div class="progress-container"><div id="dbsBar" class="progress-bar"></div></div>
+      <div class="progress-container"><div id="dbsBar" class="progress-bar" style="background:var(--dbs);"></div></div>
 
       <div class="stat-box" style="color:var(--uni); font-weight:bold;"><span>🦁 Uniopen 任務 ($12,500)</span><span id="uniStatus">0 品牌</span></div>
       <div class="progress-container"><div id="uniBar" class="progress-bar" style="background:var(--uni);"></div></div>
-
       <div class="brand-chips" id="brandChips">
-          <span class="chip" data-brand="711">7-11</span><span class="chip" data-brand="starbucks">星巴克</span>
-          <span class="chip" data-brand="carrefour">家樂福</span><span class="chip" data-brand="cosmed">康是美</span><span class="chip" data-brand="others">其他統一</span>
+          <span class="chip" data-brand="711">7-11</span><span class="chip" data-brand="starbucks">星巴克</span><span class="chip" data-brand="carrefour">家樂福</span><span class="chip" data-brand="cosmed">康是美</span><span class="chip" data-brand="smile">速邁樂</span><span class="chip" data-brand="others">其他統一</span>
+      </div>
+      <div id="monthlyRewardSummary" style="font-size: 0.75em; color: var(--sub); margin-top: 10px; text-align: center; border-top: 1px solid #ddd; padding-top: 5px;">
+          本月累計回饋：<span id="monthPoints">無資料</span>
       </div>
   </div>
 
   <div id="sec-entry" class="section">
       <div class="card">
           <h2>新增消費</h2>
-          <div class="grid-2"><div class="form-row"><label>日期</label><input type="date" id="txDate"></div><div class="form-row"><label>分類</label><select id="txCat"><option>餐飲美食</option><option>交通出行</option><option>購物消費</option><option>居家生活</option><option>休閒娛樂</option><option>其他</option></select></div></div>
-          <div class="form-row"><label>項目名稱</label><input type="text" id="txDesc" placeholder="例如：統一超商"></div>
+          <div class="grid-2">
+            <div class="form-row"><label>日期</label><input type="date" id="txDate" onchange="recalc()"></div>
+            <div class="form-row"><label>支付卡片</label><select id="txCard" onchange="toggleCardInputs()"><option value="UNIOPEN">中信 Uniopen</option><option value="DBS">星展傳說對決</option><option value="CUBE">國泰 CUBE</option><option value="OTHER">其他</option></select></div>
+          </div>
+          <div class="form-row"><label>消費描述</label><input type="text" id="txDesc" placeholder="例如：加油、午餐、網購"></div>
           <div class="grid-2">
               <div class="form-row"><label>金額</label><input type="number" id="txAmt" oninput="recalc()"></div>
-              <div class="form-row"><label>卡片</label><select id="txCard" onchange="recalc()"><option value="UNIOPEN">中信 Uniopen</option><option value="DBS">星展傳說對決</option><option value="CUBE_L3">國泰 CUBE</option><option value="OTHER">其他</option></select></div>
+              <div class="form-row"><label>類別</label><select id="txCat"><option>餐飲美食</option><option>交通出行</option><option>購物消費</option><option>居家生活</option><option>休閒娛樂</option><option>其他</option></select></div>
           </div>
-          <div class="grid-2">
-              <div class="form-row"><label>支付方式</label><select id="txMethod" onchange="recalc()"><option value="PHYSICAL">實體/感應</option><option value="ICASH_PAY">icash Pay (+4%)</option></select></div>
-              <div class="form-row"><label>統一品牌</label><select id="txBrand" onchange="recalc()"><option value="NONE">非統一</option><option value="711">7-11</option><option value="starbucks">星巴克</option><option value="carrefour">家樂福</option><option value="cosmed">康是美</option><option value="others">其他統一</option></select></div>
+
+          <div id="uniInputs">
+            <div class="grid-2">
+                <div class="form-row"><label>支付方式</label><select id="txMethod" onchange="recalc()"><option value="PHYSICAL">實體/感應</option><option value="ICASH_PAY">icash Pay (+4%)</option></select></div>
+                <div class="form-row"><label>統一品牌</label><select id="txBrand" onchange="recalc()"><option value="NONE">非統一通路</option><option value="711">7-11</option><option value="starbucks">星巴克</option><option value="carrefour">家樂福</option><option value="cosmed">康是美</option><option value="smile">速邁樂 (Smile)</option><option value="others">其他統一</option></select></div>
+            </div>
           </div>
-          <div id="prePreview" style="background:#F9F9F9; padding:12px; border-radius:8px; font-size:0.95em; margin-top:10px; border:1px dashed #DDD; color: var(--text);">
-              預計回饋：<span id="preTotal" style="font-weight:bold; color:var(--primary);">0</span>
+
+          <div id="cubeInputs" class="hidden">
+            <div class="form-row"><label>CUBE 權益方案 (手動選擇)</label>
+                <select id="cubePlan" onchange="recalc()">
+                    <option value="3">樂饗購 / 玩數位 / 趣旅行 (3%)</option>
+                    <option value="2">集精選 (2%) - 7-11/全家/家樂福</option>
+                    <option value="0.3">一般消費 (0.3%)</option>
+                </select>
+            </div>
+          </div>
+
+          <div id="prePreview" style="background:#F9F9F9; padding:12px; border-radius:8px; font-size:0.95em; margin-top:10px; border:1px dashed #DDD;">
+              預計獲得：<span id="preTotal" style="font-weight:bold; color:var(--primary);">請輸入金額</span>
           </div>
           <button onclick="commitTx()" class="btn-main" style="margin-top:15px;">確認記帳</button>
       </div>
   </div>
 
   <div id="sec-miles" class="section hidden">
-      <div class="card"><h2>點數資產庫存 (AM 換算)</h2><div id="assetSummary"></div></div>
       <div class="card">
-          <h2>手動調整點數</h2>
+          <h2>點數錢包 (AM 換算)</h2>
+          <div class="asset-grid" id="assetSummary"></div>
+      </div>
+      <div class="card">
+          <h2>手動點數變動 (補點/兌換)</h2>
           <div class="grid-2">
               <select id="adjType">
-                  <option value="AM">AM 實體里程</option>
-                  <option value="DBS_PT">星展點數</option>
-                  <option value="OPEN_PT">OpenPoint</option>
-                  <option value="LINE_PT">LINE POINTS</option>
-                  <option value="HAMI_PT">HamiPoint</option>
-                  <option value="HG_PT">HappyGo</option>
-                  <option value="CUBE_PT">小樹點</option>
-                  <option value="TS_PT">台新點</option>
+                  <option value="AM">AM 實體里程</option><option value="DBS_PT">星展點</option><option value="OPEN_PT">OP 點</option>
+                  <option value="LINE_PT">LP 點</option><option value="CUBE_PT">小樹點</option><option value="HAMI_PT">Hami點</option>
+                  <option value="HG_PT">HappyGo</option><option value="TS_PT">台新點</option>
               </select>
               <input type="number" id="adjVal" placeholder="+/- 點數">
           </div>
-          <div class="form-row" style="margin-top:10px;">
-              <label>調整原因 / 來源</label>
-              <input type="text" id="adjReason" placeholder="例如：過期扣點、活動贈點、首刷禮">
-          </div>
-          <button onclick="commitAdj()" class="btn-main" style="background:var(--secondary); margin-top:10px;">確認調整</button>
+          <div class="form-row" style="margin-top:10px;"><label>調整說明</label><input type="text" id="adjReason" placeholder="例如：手動兌換補償"></div>
+          <button onclick="commitAdj()" class="btn-main" style="background:var(--secondary); margin-top:10px;">更新點數</button>
       </div>
       <div class="card">
-          <h2>點數流水帳歷史</h2>
-          <div class="table-wrapper">
-              <table id="ledgerTable">
-                  <thead><tr><th>日期</th><th>原因/來源</th><th>點數變動</th><th>換算 AM</th><th>刪</th></tr></thead>
-                  <tbody></tbody>
-              </table>
-          </div>
+          <h2>點數流水帳</h2>
+          <div class="table-wrapper"><table id="ledgerTable"><thead><tr><th>日期</th><th>來源</th><th>變動</th><th>里程</th><th>刪</th></tr></thead><tbody></tbody></table></div>
       </div>
   </div>
 
   <div id="sec-history" class="section hidden">
       <div class="card">
-          <h2>歷史紀錄</h2>
-          <div class="grid-2">
-              <button onclick="exportExcel()" style="background:#2ecc71; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">匯出</button>
-              <button onclick="document.getElementById('importFile').click()" style="background:#3498db; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">匯入</button>
+          <h2>消費紀錄與工具</h2>
+          <div class="grid-2" style="margin-bottom:15px;">
+              <button onclick="exportExcel()" style="background:#2ecc71; color:white; border:none; padding:10px; border-radius:8px;">匯出 Excel</button>
+              <button onclick="document.getElementById('importFile').click()" style="background:#3498db; color:white; border:none; padding:10px; border-radius:8px;">匯入備份</button>
               <input type="file" id="importFile" style="display:none;" onchange="importExcel(event)">
           </div>
-          <div class="table-wrapper" style="margin-top:20px;">
-              <table id="txTable">
-                  <thead><tr><th>日期</th><th>項目</th><th>金額/類型</th><th>預計回饋</th><th>刪</th></tr></thead>
-                  <tbody></tbody>
-              </table>
-          </div>
+          <div class="table-wrapper"><table id="txTable"><thead><tr><th>日期</th><th>項目</th><th>卡片/金額</th><th>回饋結果</th><th>刪</th></tr></thead><tbody></tbody></table></div>
       </div>
   </div>
 
   <div id="sec-settings" class="section hidden">
+      <div class="card"><h2>消費類別分析</h2><div style="height:220px;"><canvas id="statChart"></canvas></div></div>
       <div class="card">
-          <h2>消費佔比分析</h2>
-          <div style="max-height: 250px;"><canvas id="statChart"></canvas></div>
+          <h2>AM 里程目標與兌換比例</h2>
+          <div class="grid-2">
+              <div class="form-row"><label>目標里程 (AM)</label><input type="number" id="setGoalTarget"></div>
+              <div class="form-row"><label>顯示名稱</label><input type="text" id="setGoalName"></div>
+          </div>
+          <h3>各類點數 ➜ 1 AM 比例</h3>
+          <div id="rateInputs" class="grid-2"></div>
+          <button onclick="saveSettings()" class="btn-main" style="margin-top:15px;">儲存設定</button>
       </div>
-      <div class="card">
-          <h2>比例與目標設定</h2>
-          <div class="grid-2"><input type="text" id="setGoalName" placeholder="目標名稱"><input type="number" id="setGoalTarget" placeholder="目標金額"></div>
-          <div id="rateInputs" class="grid-2" style="margin-top:10px;"></div>
-          <button onclick="saveSettings()" class="btn-main" style="margin-top:15px;">儲存比例設定</button>
-      </div>
-      <button onclick="clearAll()" style="width:100%; color:var(--danger); background:none; border:1px solid var(--danger); padding:10px; border-radius:8px; cursor:pointer;">重置資料</button>
+      <button onclick="clearAll()" style="width:100%; color:var(--danger); border:1px solid var(--danger); background:none; padding:10px; border-radius:8px;">清空所有資料</button>
   </div>
 </div>
 
@@ -152,32 +156,62 @@
 </div>
 
 <script>
-  // 更新版本號為 v12
-  let state = JSON.parse(localStorage.getItem('am_uni_v12')) || {
-      records: [], adjusts: [], goal: { name: "里程目標", target: 50000 },
-      rates: { AM: 1, DBS_PT: 2, OPEN_PT: 0.25, LINE_PT: 0.2, HAMI_PT: 0.33, HG_PT: 0.25, CUBE_PT: 0.36, TS_PT: 0.55 }
+  let state = JSON.parse(localStorage.getItem('am_uni_v17')) || {
+      records: [], adjusts: [], goal: { name: "里程目標", target: 84000 },
+      rates: { AM: 1, DBS_PT: 2, OPEN_PT: 0.25, LINE_PT: 0.2, CUBE_PT: 0.36, HAMI_PT: 0.33, HG_PT: 0.25, TS_PT: 0.55 }
   };
 
+  function toggleCardInputs() {
+      const card = document.getElementById('txCard').value;
+      document.getElementById('uniInputs').classList.toggle('hidden', card !== 'UNIOPEN');
+      document.getElementById('cubeInputs').classList.toggle('hidden', card !== 'CUBE');
+      recalc();
+  }
+
   function getMonthStats() {
-      const m = new Date().getMonth();
-      const mRecs = state.records.filter(r => new Date(r.date).getMonth() === m);
-      const brands = new Set(mRecs.filter(r => r.brand !== 'NONE').map(r => r.brand));
-      return { brandCount: brands.size, brands: Array.from(brands),
-               dbsSpent: mRecs.filter(r => r.cardKey === 'DBS').reduce((sum, r) => sum + r.amt, 0),
-               uniSpent: mRecs.filter(r => r.cardKey === 'UNIOPEN').reduce((sum, r) => sum + r.amt, 0) };
+      const now = new Date();
+      const m = now.getMonth();
+      const y = now.getFullYear();
+      const mRecs = state.records.filter(r => {
+          const d = new Date(r.date);
+          return d.getMonth() === m && d.getFullYear() === y;
+      });
+      const brands = new Set(mRecs.filter(r => r.cardKey === 'UNIOPEN' && r.brand && r.brand !== 'NONE').map(r => r.brand));
+      const dbsSpent = mRecs.filter(r => r.cardKey === 'DBS').reduce((sum, r) => sum + r.amt, 0);
+      const uniSpent = mRecs.filter(r => r.cardKey === 'UNIOPEN').reduce((sum, r) => sum + r.amt, 0);
+
+      // 本月累計獲得點數加總
+      let monthPts = {};
+      mRecs.forEach(r => {
+          const res = calculateRowReward(r, {brandCount: brands.size});
+          if(res.ptAmount > 0) {
+              const k = res.ptName;
+              monthPts[k] = (monthPts[k] || 0) + res.ptAmount;
+          }
+      });
+      const ptStr = Object.entries(monthPts).map(([k,v]) => `${v} ${k}`).join(' | ') || "目前暫無回饋";
+
+      return { brandCount: brands.size, brands: Array.from(brands), dbsSpent, uniSpent, ptStr };
   }
 
   function calculateRowReward(r, s) {
-      let ptAmount = 0; let ptName = ""; let ptKey = "";
-      if(r.cardKey === 'DBS') {
+      let ptAmount = 0, ptName = "", ptKey = "";
+      if (r.cardKey === 'DBS') {
           ptAmount = Math.round(r.amt * (r.amt <= 11363 ? 0.1 : 0.012));
           ptName = "DBS"; ptKey = "DBS_PT";
-      } else if(r.cardKey === 'UNIOPEN') {
-          let rate = (s.brandCount >= 5 ? 0.07 : 0.03) + (r.method === 'ICASH_PAY' ? 0.04 : 0);
+      } else if (r.cardKey === 'UNIOPEN') {
+          let rate = 0.01;
+          if(r.brand !== 'NONE') rate += 0.02;
+          if(r.method === 'ICASH_PAY') rate += 0.04;
+          if(s.brandCount >= 5) rate += 0.04;
+          if(r.brand === 'smile' && r.method === 'ICASH_PAY') {
+              const d = new Date(r.date).getDay();
+              if([2, 4, 6].includes(d)) rate += 0.06;
+          }
           ptAmount = Math.round(r.amt * rate);
           ptName = "OP"; ptKey = "OPEN_PT";
-      } else if(r.cardKey === 'CUBE_L3') {
-          ptAmount = Math.round(r.amt * 0.03);
+      } else if (r.cardKey === 'CUBE') {
+          ptAmount = Math.round(r.amt * (parseFloat(r.cubePlan || 3) / 100));
           ptName = "小樹"; ptKey = "CUBE_PT";
       }
       return { ptAmount, ptName, ptKey, amTotal: Math.round(ptAmount * (state.rates[ptKey] || 0)) };
@@ -186,7 +220,10 @@
   function refreshUI() {
       const s = getMonthStats();
       let totalAM = state.adjusts.reduce((sum, a) => sum + (parseFloat(a.amt) * (state.rates[a.type] || 0)), 0);
-      state.records.forEach(r => { totalAM += calculateRowReward(r, s).amTotal; });
+      state.records.forEach(r => { 
+          const rw = calculateRowReward(r, s);
+          totalAM += rw.amTotal; 
+      });
 
       document.getElementById('currentMilesDisp').innerText = Math.round(totalAM).toLocaleString();
       document.getElementById('targetMilesDisp').innerText = state.goal.target.toLocaleString();
@@ -195,99 +232,35 @@
       document.getElementById('dbsBar').style.width = Math.min(100, (s.dbsSpent/11363)*100) + "%";
       document.getElementById('uniStatus').innerText = `${s.brandCount} 品牌`;
       document.getElementById('uniBar').style.width = Math.min(100, (s.uniSpent/12500)*100) + "%";
+      document.getElementById('monthPoints').innerText = s.ptStr;
       document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', s.brands.includes(c.dataset.brand)));
 
-      renderAsset();
-      renderHistory(s);
-      renderLedger(s);
+      renderAsset(s); renderHistory(s); renderLedger(s);
   }
 
   function renderLedger(s) {
       let ledger = state.adjusts.map(a => ({ ...a, isManual: true }));
       state.records.forEach(r => {
-          const reward = calculateRowReward(r, s);
-          if(reward.ptAmount > 0) {
-              ledger.push({ id: r.id, date: r.date, type: reward.ptKey, amt: reward.ptAmount, reason: r.desc, isManual: false, am: reward.amTotal });
-          }
+          const rw = calculateRowReward(r, s);
+          if(rw.ptAmount > 0) ledger.push({ id: r.id, date: r.date, type: rw.ptKey, amt: rw.ptAmount, reason: r.desc, isManual: false, am: rw.amTotal });
       });
       ledger.sort((a,b) => new Date(b.date) - new Date(a.date));
-
-      document.querySelector('#ledgerTable tbody').innerHTML = ledger.map(l => `
-          <tr>
-              <td><small>${l.date.slice(5)}</small></td>
-              <td>${l.isManual ? '<span class="ledger-manual">[調]</span>' : '<span class="ledger-auto">[費]</span>'} ${l.reason}</td>
-              <td>${l.amt > 0 ? '+' : ''}${l.amt} ${l.type.replace('_PT','')}</td>
-              <td style="color:var(--primary); font-weight:bold;">${Math.round(l.isManual ? l.amt * (state.rates[l.type]||0) : l.am)}</td>
-              <td>${l.isManual ? `<button onclick="delAdj(${l.id})" style="border:none; background:none; color:red;">❌</button>` : ''}</td>
-          </tr>
-      `).join('');
+      document.querySelector('#ledgerTable tbody').innerHTML = ledger.map(l => `<tr><td><small>${l.date.slice(5)}</small></td><td>${l.isManual ? '[調]' : '[費]'} ${l.reason}</td><td>${l.amt} ${l.type.replace('_PT','')}</td><td style="color:var(--primary); font-weight:bold;">${Math.round(l.am || l.amt*(state.rates[l.type]||0))}</td><td>${l.isManual ? `<button onclick="delAdj(${l.id})" style="border:none;background:none;color:red;">❌</button>` : ''}</td></tr>`).join('');
   }
 
   function renderHistory(s) {
       document.querySelector('#txTable tbody').innerHTML = state.records.map(r => {
-          const reward = calculateRowReward(r, s);
-          return `<tr>
-              <td>${r.date.slice(5)}</td>
-              <td>${r.desc}</td>
-              <td>$${r.amt.toLocaleString()}<br><small>${r.cardKey}</small></td>
-              <td><span class="reward-tag">${reward.ptAmount} ${reward.ptName}</span><br><span style="color:var(--primary); font-weight:bold;">${reward.amTotal} AM</span></td>
-              <td><button onclick="delRec(${r.id})" style="border:none; background:none; color:red;">❌</button></td>
-          </tr>`;
+          const rw = calculateRowReward(r, s);
+          return `<tr><td>${r.date.slice(5)}</td><td>${r.desc}</td><td><small>${r.cardKey}</small><br>$${r.amt.toLocaleString()}</td><td>${rw.ptAmount}${rw.ptName}<br><b>${rw.amTotal} AM</b></td><td><button onclick="delRec(${r.id})" style="border:none;background:none;color:red;">❌</button></td></tr>`;
       }).join('');
   }
 
-  function renderAsset() {
+  function renderAsset(s) {
       document.getElementById('assetSummary').innerHTML = Object.entries(state.rates).map(([k,v]) => {
-          let fromAdj = state.adjusts.filter(a=>a.type===k).reduce((sum,a)=>sum+parseFloat(a.amt), 0);
-          const s = getMonthStats();
-          let fromRec = state.records.reduce((sum, r) => {
-              const rw = calculateRowReward(r, s);
-              return rw.ptKey === k ? sum + rw.ptAmount : sum;
-          }, 0);
-          let count = fromAdj + fromRec;
-          return `<div class="stat-box" style="border-bottom:1px solid #EEE; padding:5px 0;"><span>${k.replace('_PT','')}</span><span>${Math.round(count).toLocaleString()} (≈${Math.round(count*v).toLocaleString()} AM)</span></div>`;
+          let count = state.adjusts.filter(a=>a.type===k).reduce((sum,a)=>sum+parseFloat(a.amt), 0);
+          count += state.records.reduce((sum, r) => { const rw = calculateRowReward(r, s); return rw.ptKey === k ? sum + rw.ptAmount : sum; }, 0);
+          return `<div class="asset-item"><div style="font-size:0.7em; color:var(--sub);">${k.replace('_PT','')}</div><div style="font-weight:bold; font-size:1em;">${Math.round(count).toLocaleString()}</div><div style="font-size:0.75em; color:var(--primary);">≈ ${Math.round(count*v).toLocaleString()} AM</div></div>`;
       }).join('');
-  }
-
-  function recalc() {
-      const amt = parseFloat(document.getElementById('txAmt').value) || 0;
-      const card = document.getElementById('txCard').value;
-      const s = getMonthStats();
-      const tempRec = { amt, cardKey: card, method: document.getElementById('txMethod').value, brand: document.getElementById('txBrand').value };
-      const reward = calculateRowReward(tempRec, s);
-      document.getElementById('preTotal').innerHTML = reward.ptAmount ? `${reward.ptAmount} ${reward.ptName} <span style="color:var(--sub); margin:0 5px;">/</span> ${reward.amTotal} AM` : "0";
-  }
-
-  function commitTx() {
-      const amt = parseFloat(document.getElementById('txAmt').value);
-      if(!amt) return alert("請輸入金額");
-      state.records.unshift({ id: Date.now(), date: document.getElementById('txDate').value, cat: document.getElementById('txCat').value, desc: document.getElementById('txDesc').value, amt, cardKey: document.getElementById('txCard').value, method: document.getElementById('txMethod').value, brand: document.getElementById('txBrand').value });
-      save();
-  }
-
-  function commitAdj() {
-      const val = parseFloat(document.getElementById('adjVal').value);
-      const reason = document.getElementById('adjReason').value || "手動調整";
-      if(!val) return alert("請輸入點數");
-      state.adjusts.unshift({ id: Date.now(), date: new Date().toISOString().split('T')[0], type: document.getElementById('adjType').value, amt: val, reason: reason });
-      document.getElementById('adjVal').value = "";
-      document.getElementById('adjReason').value = "";
-      save();
-  }
-
-  function saveSettings() {
-      state.goal.name = document.getElementById('setGoalName').value || "里程目標";
-      state.goal.target = parseInt(document.getElementById('setGoalTarget').value) || 50000;
-      Object.keys(state.rates).forEach(k => { state.rates[k] = parseFloat(document.getElementById('rate_'+k).value); });
-      save(); alert("比例已更新");
-  }
-
-  function nav(id) {
-      document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-      document.getElementById('sec-' + id).classList.remove('hidden');
-      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      event.currentTarget.classList.add('active');
-      if(id==='settings') renderChart();
   }
 
   function renderChart() {
@@ -295,34 +268,67 @@
       if(window.myChart) window.myChart.destroy();
       const cats = ["餐飲美食","交通出行","購物消費","居家生活","休閒娛樂","其他"];
       const data = cats.map(c => state.records.reduce((sum, r) => r.cat===c?sum+r.amt:sum, 0));
-      window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: cats, datasets: [{ data, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40'] }] }, options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } } } });
+      window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: cats, datasets: [{ data, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40'] }] }, options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } } });
+  }
+
+  function recalc() {
+      const card = document.getElementById('txCard').value;
+      const amt = parseFloat(document.getElementById('txAmt').value) || 0;
+      const s = getMonthStats();
+      const res = calculateRowReward({ date: document.getElementById('txDate').value, amt, cardKey: card, method: document.getElementById('txMethod').value, brand: document.getElementById('txBrand').value, cubePlan: document.getElementById('cubePlan').value }, s);
+      document.getElementById('preTotal').innerText = res.ptAmount ? `${res.ptAmount} ${res.ptName} / ${res.amTotal} AM` : "請輸入金額";
+  }
+
+  function commitTx() {
+      const amt = parseFloat(document.getElementById('txAmt').value);
+      if(!amt) return alert("請輸入金額");
+      state.records.unshift({ id: Date.now(), date: document.getElementById('txDate').value, cat: document.getElementById('txCat').value, desc: document.getElementById('txDesc').value, amt, cardKey: document.getElementById('txCard').value, method: document.getElementById('txMethod').value, brand: document.getElementById('txBrand').value, cubePlan: document.getElementById('cubePlan').value });
+      save(); document.getElementById('txAmt').value = ''; document.getElementById('txDesc').value = '';
+  }
+
+  function commitAdj() {
+      const val = parseFloat(document.getElementById('adjVal').value);
+      if(!val) return alert("請輸入點數");
+      state.adjusts.unshift({ id: Date.now(), date: new Date().toISOString().split('T')[0], type: document.getElementById('adjType').value, amt: val, reason: document.getElementById('adjReason').value || "手動調整" });
+      save(); document.getElementById('adjVal').value = ''; document.getElementById('adjReason').value = '';
+  }
+
+  function saveSettings() {
+      state.goal.name = document.getElementById('setGoalName').value;
+      state.goal.target = parseInt(document.getElementById('setGoalTarget').value);
+      Object.keys(state.rates).forEach(k => { state.rates[k] = parseFloat(document.getElementById('rate_'+k).value); });
+      save(); alert("設定已儲存");
   }
 
   function exportExcel() {
-      const ws = XLSX.utils.json_to_sheet(state.records);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Records");
-      XLSX.writeFile(wb, "mileage_backup.xlsx");
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.records), "Records");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.adjusts), "Adjusts");
+    XLSX.writeFile(wb, "AM_Backup_v17.xlsx");
   }
 
   function importExcel(e) {
-      const reader = new FileReader();
-      reader.onload = (f) => {
-          state.records = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(f.target.result), {type: 'array'}).Sheets["Records"]);
-          save(); location.reload();
-      };
-      reader.readAsArrayBuffer(e.target.files[0]);
+    const reader = new FileReader();
+    reader.onload = (f) => {
+        const data = XLSX.read(new Uint8Array(f.target.result), {type: 'array'});
+        state.records = XLSX.utils.sheet_to_json(data.Sheets["Records"]);
+        if(data.Sheets["Adjusts"]) state.adjusts = XLSX.utils.sheet_to_json(data.Sheets["Adjusts"]);
+        save(); location.reload();
+    };
+    reader.readAsArrayBuffer(e.target.files[0]);
   }
 
-  function save() { localStorage.setItem('am_uni_v12', JSON.stringify(state)); refreshUI(); }
-  function delRec(id) { if(confirm("刪除此消費？回饋也會同步扣除")) { state.records = state.records.filter(r=>r.id!==id); save(); } }
-  function delAdj(id) { if(confirm("刪除此調整紀錄？")) { state.adjusts = state.adjusts.filter(a=>a.id!==id); save(); } }
-  function clearAll() { if(confirm("確定重置所有資料？")) { localStorage.clear(); location.reload(); } }
+  function save() { localStorage.setItem('am_uni_v17', JSON.stringify(state)); refreshUI(); }
+  function delRec(id) { if(confirm("確定刪除此筆消費？")) { state.records = state.records.filter(r=>r.id!==id); save(); } }
+  function delAdj(id) { if(confirm("確定刪除此筆調整？")) { state.adjusts = state.adjusts.filter(a=>a.id!==id); save(); } }
+  function clearAll() { if(confirm("這將會清除所有記帳紀錄與點數資產，確定嗎？")) { localStorage.clear(); location.reload(); } }
+  function nav(id) { document.querySelectorAll('.section').forEach(s => s.classList.add('hidden')); document.getElementById('sec-' + id).classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); event.currentTarget.classList.add('active'); if(id === 'settings') setTimeout(renderChart, 100); }
 
+  // 初始化
   document.getElementById('txDate').valueAsDate = new Date();
   document.getElementById('setGoalName').value = state.goal.name;
   document.getElementById('setGoalTarget').value = state.goal.target;
-  document.getElementById('rateInputs').innerHTML = Object.keys(state.rates).map(k => `<div class="form-row"><label>${k.replace('_PT','')} 比例</label><input type="number" step="0.01" id="rate_${k}" value="${state.rates[k]}"></div>`).join('');
+  document.getElementById('rateInputs').innerHTML = Object.keys(state.rates).map(k => `<div class="form-row"><label>${k.replace('_PT','')}</label><input type="number" step="0.01" id="rate_${k}" value="${state.rates[k]}"></div>`).join('');
   refreshUI();
 </script>
 </body>
